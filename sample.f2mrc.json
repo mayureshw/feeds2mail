@@ -1,0 +1,37 @@
+{
+"defaults" : {
+    "mailto" : "mylogin@localhost",
+    "dryrun" : false
+    },
+"feeds" : [
+    {
+    "typ" : "youtube",
+    "playlistid" : "PL3HhMTCWB-e9rMw_-beyjQMaD2BP5K9ll",
+    "remarks" : "the week that wasn't",
+    "mailtosuf" : "tv"
+    },
+    {
+    "typ" : "youtube",
+    "channelid" : "UCuB112ZHY1iygcDEHRg6P5Q",
+    "remarks": "So Sorry",
+    "mailtosuf" : "tv"
+    },
+    {
+    "typ" : "metarss",
+    "url" : "https://www.firstpost.com/rss",
+    "subpref" : "FP",
+    "feedregex" : "https://www.firstpost.com/rss/",
+    "subfeeds" : [
+        { "txtregex" : "Health", "mailtosuf" : "health" },
+        { "txtregex" : "First Cricket", "mailtosuf" : "cricket" },
+        { "txtregex" : "India", "mailtosuf" : "india" },
+        { "txtregex" : "Business", "mailtosuf" : "business" }
+        ]
+    },
+    {
+    "typ" : "rss",
+    "url" : "http://feed.dilbert.com/dilbert/daily_strip",
+    "mailtosuf" : "comics"
+    }
+    ]
+}
