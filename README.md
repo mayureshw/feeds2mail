@@ -75,6 +75,67 @@ Following python packages are required
 Feed settings reside in $HOME/.f2mrc.json. A sample settings file
 sample.f2mrc.json is included in the package.
 
+The root level is a dictionary with following properties:
+
+    defaults
+    feeds
+
+defaults is a dictionary where default properties of any feed can be specified.
+Most typically you might want to specify the following:
+
+    dryrun : true | false, if true, only the first feed in the feedlist will be
+    processed, but no email will be generated, feeds' state will not be
+    updated. Set it to true if you want to test out a new feed. Remember to
+    place the feed under test at the first position in the lsist.
+
+    mailto : default email id to which generated emails should be sent
+
+feeds is a list of dictionaries where each dictionary specifies properties of 1
+feed. Following properties can be specified:
+
+    channelid|playlistid : applicable to youtube type, to specify the
+    respective id
+
+    feedregex: In metarss, this regex helps identify the links to individual
+    rss fields, which are further chosen by applying txtregex of their title
+    texts.
+
+    mailto : Typically specified under defaults, but can be overridden for
+    individual feeds. Most typically you might not want to specify this for
+    feeds, you might use mailtosuf instead.
+
+    mailtosuf: A +suffix attached to the mailto address. For example, if your
+    mailto address is myname@localhost and mailtosuf is set to mytag, then
+    email will go to myname+mytag@localhost. The mail filter rules can make use
+    of this to classify the email into different folders.
+
+    remarks: Play no role in the software. This is for your own documentation
+    purpose.
+
+    subfeeds: In metarss, this a list of dictionaries that specify individual
+    rss feed's properties. Note that, as this is a meta feed, url property is
+    not required to be specified in these subfeeds.
+
+    subpref: A subject prefix, that will be prefixed to the mail subject, if
+    specified. It is put in square brackets. Typically you might want to
+    indicate the source of the article by doing so. You might use a common tag
+    for articles from multiple sources. Then in your mailbox this helps spot
+    the publiher of it.  It is recommended to keep its length small, at the
+    most 4 may be so that it doesn't eat up into the title's space. For
+    example, subpref FP will be prefixed as [FP] to the subject line and it
+    might help you spot that the article is from firstpost when looking at the
+    mailbox. (You of course know it when you open the URL, but many times you
+    might not even open the email if the subject doesn't interest you.)
+
+    txtregex : For all feed types and subfeeds in metarss, this regular
+    expression, if specified, is applied to select the item from the feed. For
+    metarsss, it is applied to select rss feeds from a feeds page.
+
+    typ : youtube|rss|metarss, as explained above
+
+    url: In metarss, it is the page of feeds while in rss, it is the RSS feed
+    url.
+
 # Running f2m
 
 Make sure that you have $HOME/.f2mrc.json in place, as described above.
