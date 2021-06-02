@@ -16,7 +16,7 @@ class Feed:
     headers = {'User-agent':'ELinks/0.9.3 (textmode; Linux 2.6.9-kanotix-8 i686; 127x41)'}
     _defaults = {
         'mailtosuf':'', 'sendas':'nobody@localhost', 'subpref':'', 'remarks':'', 'txtregex':'.',
-        'urlregex':'.'
+        'urlregex':'.', 'active':True,
         }
     toolddt = datetime.today() - timedelta(days=365)
     def qualifyurl(self,url):
@@ -29,6 +29,7 @@ class Feed:
             )
     def report(self): pass
     def run(self):
+        if not self.active: return
         seen = fs.seen(self.url)
         txtre = re.compile(self.txtregex)
         items = [ i for i in self.items() if re.search(txtre,i.title) ]
@@ -40,7 +41,7 @@ class Feed:
         if len(items) > 0: fs.updstat(self.url,[i.url for i in items])
     def __init__(self,rc,fspec):
         self.rc = rc
-        self.__dict__.update({**self.rc.defaults,**Feed._defaults,**fspec})
+        self.__dict__.update({**Feed._defaults,**self.rc.defaults,**fspec})
         if self.mailtosuf:
             basemail,domain = self.mailto.split('@')
             self.mailto = basemail + '+' + self.mailtosuf + '@' + domain

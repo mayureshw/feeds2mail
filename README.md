@@ -83,6 +83,10 @@ The root level is a dictionary with following properties:
 defaults is a dictionary where default properties of any feed can be specified.
 Most typically you might want to specify the following:
 
+    active : true | false, default is true, if false the feed is not processed.
+    Typically when you add a new feed, set this to false and set the same
+    property to true in the individual feed to run just the new feed.
+
     dryrun : true | false, if true, only the first feed in the feedlist will be
     processed, but no email will be generated, feeds' state will not be
     updated. Set it to true if you want to test out a new feed. Remember to
@@ -92,6 +96,8 @@ Most typically you might want to specify the following:
 
 feeds is a list of dictionaries where each dictionary specifies properties of 1
 feed. Following properties can be specified:
+
+    active : see description under defaults
 
     channelid|playlistid : applicable to youtube type, to specify the
     respective id
