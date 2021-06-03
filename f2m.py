@@ -4,6 +4,6 @@ from feedstat import fs
 
 for feed in frc.feeds:
     try: feed.run()
-    except Exception as e: print('','There was an error running this feed')
+    except Exception as e: print('','There was an error running this feed:',e)
     if frc.dryrun: break
 if not frc.dryrun: fs.savestat()

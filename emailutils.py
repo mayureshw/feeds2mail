@@ -20,7 +20,8 @@ def uemail(msgs):
         if bcc: msg['Bcc'] = bcc
         if subject: msg['Subject'] = subject
 
-        msg.set_content(msgtext)
+        #  unsure about this line, this was introduced when for a feed it was failing
+        msg.set_content(msgtext.encode('utf-8','ignore'),maintype='text',subtype='plain')
         for a in attachments if isinstance(attachments,list) else [attachments]:
             maintype,subtype = magic.from_file(str(a),mime=True).split('/')
             with a.open('rb') as fp:
