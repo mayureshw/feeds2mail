@@ -23,10 +23,11 @@ class Feed:
         sch,base,_ = urlparse(url)[:3]
         return url if base and sch else urljoin(self.baseurl,quote(url,safe='=?&/'))
     def send(self,items):
+        if self.rc.dryrun: return
         # (sendas,sendat,to,cc,bcc,subject,text,attachments)
-        if not self.rc.dryrun: uemail(
-            (i.sendas,i.date,i.mailto,[],[],i.title,i.mailbody(),[]) for i in items
-            )
+        for i in items:
+            try: uemail([(i.sendas,i.date,i.mailto,[],[],i.title,i.mailbody(),[])])
+            except Exception as e: print('Error sending mail',i.title)
     def report(self): pass
     def run(self):
         if not self.active: return
