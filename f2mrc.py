@@ -8,7 +8,15 @@ from datetime import datetime, timedelta
 from emailutils import uemail
 from feedparser import parse as rssparse
 from functools import reduce
+from yt_dlp import YoutubeDL
 import re
+
+def vidur(url):
+    with YoutubeDL({'quiet':True}) as ydl:
+        try:
+            return ydl.extract_info(url, download=False)['duration_string']
+        except Exception:
+            return ''
 
 def subclassest(cls): return [ st for s in cls.__subclasses__() for st in [s]+subclassest(s) ]
 
@@ -19,6 +27,7 @@ class Feed:
         'urlregex':'.', 'active':True,
         }
     toolddt = datetime.today() - timedelta(days=365)
+    def subpref2(self,item): return ''
     def qualifyurl(self,url):
         sch,base,_ = urlparse(url)[:3]
         return url if base and sch else urljoin(self.baseurl,quote(url,safe='=?&/'))
@@ -50,6 +59,8 @@ class Feed:
 class item:
     def mailbody(self): return '\n\n'.join([self.descr,self.url]+self.morelinks)
 
+# TODO particularly after video duration field was added, it makes sense to
+# construct rssitem only if it is new
 class rssitem(item):
     def __init__(self,dom,f):
         self.sendas = f.sendas
@@ -57,9 +68,11 @@ class rssitem(item):
         #TODO: Meaning of trailing fields in the parsed date is not clear, we are losing TZ info
         self.date = datetime(*date[0:-3]) if date else datetime.today()
         self.mailto = f.mailto
-        self.title = (('['+f.subpref+'] ') if f.subpref else '') + bs(
-            dom['title'],features='html.parser').text
         self.url = dom['link']
+        subpref2 = f.subpref2(self)
+        self.title = (('['+f.subpref+'] ') if f.subpref else '') + \
+            ( ( subpref2 + ' ' ) if subpref2 else '' ) + \
+            bs(dom['title'],features='html.parser').text
         summary = dom['content'][0]['value'] if 'content' in dom else \
             dom['summary_detail']['value'] if 'summary_detail' in dom else dom['summary']
         self.morelinks = [ l['href'] for l in dom['links'] if l['href'] != self.url ] if 'links' in dom else []
@@ -97,6 +110,7 @@ class metarss(Feed):
 
 class youtube(rss):
     ytrsspref = 'https://www.youtube.com/feeds/videos.xml?'
+    def subpref2(self,item): return vidur(item.url)
     def __init__(self,rc,fspec):
         urlargs = { 'channel_id' : fspec['channelid'] } if 'channelid' in fspec else {
             'playlist_id' : fspec['playlistid'] }

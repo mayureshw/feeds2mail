@@ -61,6 +61,10 @@ small fraction of which you are interested in. You can achieve the filtering by
 specifying txtregex property to filter a busy feed to retain only the articles
 of your interest. (All properties are described in the later sections below.)
 
+The youtube feed items carry the video duration in the subject line (using
+yt-dlp package) of the email. This may help in deciding whether to view the
+item now or at leisure later.
+
 # System Requirements:
 
 - python3 is required
@@ -69,6 +73,7 @@ Following python packages are required
 
 - py-filelock
 - py-feedparser
+- yt-dlp
 
 # Setting up feeds
 
