@@ -57,7 +57,7 @@ class Feed:
             self.mailto = basemail + '+' + self.mailtosuf + '@' + domain
         self.baseurl = '://'.join(urlparse(self.url)[:2])
 class item:
-    def mailbody(self): return '\n\n'.join([self.descr,self.url]+self.morelinks)
+    def mailbody(self): return '\n\n'.join(self.morelinks+[self.descr,self.url])
 
 # TODO particularly after video duration field was added, it makes sense to
 # construct rssitem only if it is new
