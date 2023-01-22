@@ -35,8 +35,8 @@ class Feed:
         if self.rc.dryrun: return
         # (sendas,sendat,to,cc,bcc,subject,text,attachments)
         for i in items:
-            try: uemail([(i.sendas,i.date,i.mailto,[],[],i.title,i.mailbody(),[])])
-            except Exception as e: print('Error sending mail',i.title)
+            try: uemail([(i.sendas(),i.date,i.mailto(),[],[],i.subject(),i.mailbody(),[])])
+            except Exception as e: print('Error sending mail',i.subject())
     def report(self): pass
     def run(self):
         if not self.active: return
@@ -57,26 +57,31 @@ class Feed:
             self.mailto = basemail + '+' + self.mailtosuf + '@' + domain
         self.baseurl = '://'.join(urlparse(self.url)[:2])
 class item:
-    def mailbody(self): return '\n\n'.join(self.morelinks+[self.descr,self.url])
+    def mailbody(self): return '\n\n'.join(self.morelinks()+[self.descr(),self.url])
 
-# TODO particularly after video duration field was added, it makes sense to
-# construct rssitem only if it is new
+# Fields that participate in filtering of items are attributes
+# Fields required in mail body are functions, so that they aren't computed if item gets filtered
 class rssitem(item):
+    def sendas(self): return self.f.sendas
+    def mailto(self): return self.f.mailto
+    def morelinks(self): return [ l['href'] for l in self.dom['links'] if l['href'] != self.url ] if 'links' in self.dom else []
+    def descr(self):
+        summary = self.dom['content'][0]['value'] if 'content' in self.dom else \
+            self.dom['summary_detail']['value'] if 'summary_detail' in self.dom else self.dom['summary']
+        return bs(summary,features='html.parser').get_text(separator='\n\n')
+    def subject(self):
+        subpref2 = self.f.subpref2(self)
+        return (('['+self.f.subpref+'] ') if self.f.subpref else '') + \
+            ( ( subpref2 + ' ' ) if subpref2 else '' ) + \
+            self.title
     def __init__(self,dom,f):
-        self.sendas = f.sendas
+        self.dom = dom
+        self.f = f
+        self.url = dom['link']
+        self.title = bs(dom['title'],features='html.parser').text
         date = dom.get('published_parsed',dom.get('updated_parsed',None))
         #TODO: Meaning of trailing fields in the parsed date is not clear, we are losing TZ info
         self.date = datetime(*date[0:-3]) if date else datetime.today()
-        self.mailto = f.mailto
-        self.url = dom['link']
-        subpref2 = f.subpref2(self)
-        self.title = (('['+f.subpref+'] ') if f.subpref else '') + \
-            ( ( subpref2 + ' ' ) if subpref2 else '' ) + \
-            bs(dom['title'],features='html.parser').text
-        summary = dom['content'][0]['value'] if 'content' in dom else \
-            dom['summary_detail']['value'] if 'summary_detail' in dom else dom['summary']
-        self.morelinks = [ l['href'] for l in dom['links'] if l['href'] != self.url ] if 'links' in dom else []
-        self.descr = bs(summary,features='html.parser').get_text(separator='\n\n')
 
 class rss(Feed):
     def report(self):
