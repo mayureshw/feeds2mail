@@ -57,23 +57,25 @@ class Feed:
             self.mailto = basemail + '+' + self.mailtosuf + '@' + domain
         self.baseurl = '://'.join(urlparse(self.url)[:2])
 class item:
-    def mailbody(self): return '\n\n'.join(self.morelinks()+[self.descr(),self.url])
-
-# Fields that participate in filtering of items are attributes
-# Fields required in mail body are functions, so that they aren't computed if item gets filtered
-class rssitem(item):
+    def morelinks(self): return []
+    def descr(self) : return ''
     def sendas(self): return self.f.sendas
     def mailto(self): return self.f.mailto
-    def morelinks(self): return [ l['href'] for l in self.dom['links'] if l['href'] != self.url ] if 'links' in self.dom else []
-    def descr(self):
-        summary = self.dom['content'][0]['value'] if 'content' in self.dom else \
-            self.dom['summary_detail']['value'] if 'summary_detail' in self.dom else self.dom['summary']
-        return bs(summary,features='html.parser').get_text(separator='\n\n')
+    def mailbody(self): return '\n\n'.join(self.morelinks()+[self.descr(),self.url])
     def subject(self):
         subpref2 = self.f.subpref2(self)
         return (('['+self.f.subpref+'] ') if self.f.subpref else '') + \
             ( ( subpref2 + ' ' ) if subpref2 else '' ) + \
             self.title
+
+# Fields that participate in filtering of items are attributes
+# Fields required in mail body are functions, so that they aren't computed if item gets filtered
+class rssitem(item):
+    def morelinks(self): return [ l['href'] for l in self.dom['links'] if l['href'] != self.url ] if 'links' in self.dom else []
+    def descr(self):
+        summary = self.dom['content'][0]['value'] if 'content' in self.dom else \
+            self.dom['summary_detail']['value'] if 'summary_detail' in self.dom else self.dom['summary']
+        return bs(summary,features='html.parser').get_text(separator='\n\n')
     def __init__(self,dom,f):
         self.dom = dom
         self.f = f
