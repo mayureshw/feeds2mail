@@ -142,7 +142,7 @@ class url(Feed):
         return [ urlitem(l,self) for l in links if l.get('href',None) ]
 
 class urlgroup(metarss):
-    def setfeeds(self): self.feeds = [ url(self.rc,f) for f in self.subfeeds ]
+    def setfeeds(self): self.feeds = [ url(self.rc,{**f,**{'subpref':self.subpref}}) for f in self.subfeeds ]
 
 class FeedRC:
     def __init__(self):
