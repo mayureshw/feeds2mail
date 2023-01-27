@@ -106,7 +106,7 @@ class metarss(Feed):
     def report(self):
         if self.duplcnt: print('','duplicates:',self.duplcnt)
         for f in self.feeds: f.report()
-    def items(self):
+    def setfeeds(self):
         feedre = re.compile(self.feedregex)
         dom = bs(urlopen(Request(self.url,headers=self.headers)).read(),features='lxml')
         links = dom.findAll('a',href=feedre)
@@ -116,6 +116,8 @@ class metarss(Feed):
             rss(self.rc,{**sf,**{'subpref':self.subpref,'url':self.qualifyurl(l['href'])}})
             for sf in sfs if re.search(sf['txtre'],l.text) ]),None)  for l in links
             ] if f ]
+    def items(self):
+        self.setfeeds()
         items = [ i for f in self.feeds if f for i in f.items() ]
         reditems = reduce( lambda cur,i: cur if i.url in cur[1] else (cur[0]+[i],cur[1].union({i.url})),
             items, ([],set()) )[0]
@@ -138,6 +140,9 @@ class url(Feed):
         dom = bs(urlopen(Request(self.url,headers=self.headers)).read(),features='lxml')
         links = dom.findAll('a',text=txtre,href=urlre)
         return [ urlitem(l,self) for l in links if l.get('href',None) ]
+
+class urlgroup(metarss):
+    def setfeeds(self): self.feeds = [ url(self.rc,f) for f in self.subfeeds ]
 
 class FeedRC:
     def __init__(self):

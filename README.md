@@ -157,8 +157,11 @@ feed. Following properties can be specified:
 
     typ : youtube|rss|metarss, as explained above
 
-    url: In metarss, it is the page of feeds while in rss, it is the RSS feed
+    url : In metarss, it is the page of feeds while in rss, it is the RSS feed
     url.
+
+    urlgroup : urlgroup is to url what is metarss to rss, just grouping of URLs
+    in one feed so that duplicates from various subfeeds can be eliminated.
 
 # Running f2m
 
