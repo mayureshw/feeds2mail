@@ -65,6 +65,17 @@ The youtube feed items carry the video duration in the subject line (using
 yt-dlp package) of the email. This may help in deciding whether to view the
 item now or at leisure later.
 
+## url
+
+This feed type is to select items from an arbitrary URL use regular expression
+on its URL and/or hypertext using properties urlregex and txtregex
+respectively.
+
+Use this only as last resort and form the regular expressions carefully.
+
+Many newspapers have stopped supporting RSS feeds, which is where I found this
+type of feed useful.
+
 # System Requirements:
 
 - python3 is required
@@ -142,6 +153,8 @@ feed. Following properties can be specified:
     expression, if specified, is applied to select the item from the feed. For
     metarsss, it is applied to select rss feeds from a feeds page.
 
+    urlregex : For feed ot type "url" this regex selects the URLs on the page.
+
     typ : youtube|rss|metarss, as explained above
 
     url: In metarss, it is the page of feeds while in rss, it is the RSS feed
@@ -206,8 +219,6 @@ mails. Preferably do not tinker with this file manually unless you know what
 you are doing.
 
 # Wish list
-
-- May add More feed types such as more arbitrary url patterns in future
 
 - Multithreading to speed up the run
 

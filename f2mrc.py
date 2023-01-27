@@ -85,6 +85,13 @@ class rssitem(item):
         #TODO: Meaning of trailing fields in the parsed date is not clear, we are losing TZ info
         self.date = datetime(*date[0:-3]) if date else datetime.today()
 
+class urlitem(item):
+    def __init__(self,link,f):
+        self.f = f
+        self.url = link.get('href')
+        self.title = link.text
+        self.date = datetime.today()
+
 class rss(Feed):
     def report(self):
         if self.feedtoold: print('','feed too old',self.url)
@@ -124,15 +131,13 @@ class youtube(rss):
         url = self.ytrsspref + urlencode(urlargs)
         super().__init__(rc,{**fspec,**{'url':url}})
 
-# TODO: Plan to do this for arbitrary url, but it's too vague, let a good use case come
-#class url(Feed):
-#    def items(self):
-#        txtre = re.compile(self.txtregex)
-#        urlre = re.compile(self.urlregex)
-#        dom = bs(urlopen(Request(self.url,headers=self.headers)).read(),features='lxml')
-#        links = dom.findAll('a',text=txtre,href=urlre)
-#        for l in links: print(l.get('href',None))
-#        return []
+class url(Feed):
+    def items(self):
+        txtre = re.compile(self.txtregex)
+        urlre = re.compile(self.urlregex)
+        dom = bs(urlopen(Request(self.url,headers=self.headers)).read(),features='lxml')
+        links = dom.findAll('a',text=txtre,href=urlre)
+        return [ urlitem(l,self) for l in links if l.get('href',None) ]
 
 class FeedRC:
     def __init__(self):
