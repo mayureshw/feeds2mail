@@ -138,7 +138,9 @@ class url(Feed):
         txtre = re.compile(self.txtregex)
         urlre = re.compile(self.urlregex)
         dom = bs(urlopen(Request(self.url,headers=self.headers)).read(),features='html.parser')
-        links = dom.findAll('a',text=txtre,href=urlre)
+        # Strangely text=txtre is not filtering some feeds properly, so filtering explicitly
+        #links = dom.findAll('a',text=txtre,href=urlre)
+        links = [ l for l in dom.findAll('a',href=urlre) if re.search(txtre,l.text) ]
         return [ urlitem(l,self) for l in links if l.get('href',None) ]
 
 class urlgroup(metarss):
