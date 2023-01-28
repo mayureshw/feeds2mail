@@ -64,9 +64,10 @@ class item:
     def mailbody(self): return '\n\n'.join(self.morelinks()+[self.descr(),self.url])
     def subject(self):
         subpref2 = self.f.subpref2(self)
-        return (('['+self.f.subpref+'] ') if self.f.subpref else '') + \
+        sub = (('['+self.f.subpref+'] ') if self.f.subpref else '') + \
             ( ( subpref2 + ' ' ) if subpref2 else '' ) + \
             self.title
+        return ' '.join(sub.splitlines())
 
 # Fields that participate in filtering of items are attributes
 # Fields required in mail body are functions, so that they aren't computed if item gets filtered
