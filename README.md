@@ -73,8 +73,16 @@ respectively.
 
 Use this only as last resort and form the regular expressions carefully.
 
-Many newspapers have stopped supporting RSS feeds, which is where I found this
-type of feed useful.
+## urlgroup
+
+urlgroup is to url what is metarss to rss, just grouping of URLs in one feed so
+that duplicates from various subfeeds can be eliminated. The 'url' property of
+the urlgroup has no semantics as that of the contained url list will get
+actually used to fetch articles.  As a thumb rule just use the home page of the
+publication.
+
+Many newspapers have stopped supporting RSS feeds. Either url or urlgroup type
+may help in these cases.
 
 # System Requirements:
 
@@ -155,13 +163,8 @@ feed. Following properties can be specified:
 
     urlregex : For feed ot type "url" this regex selects the URLs on the page.
 
-    typ : youtube|rss|metarss, as explained above
+    typ : youtube|rss|metarss|url|urlgroup, as explained above
 
-    url : In metarss, it is the page of feeds while in rss, it is the RSS feed
-    url.
-
-    urlgroup : urlgroup is to url what is metarss to rss, just grouping of URLs
-    in one feed so that duplicates from various subfeeds can be eliminated.
 
 # Running f2m
 
