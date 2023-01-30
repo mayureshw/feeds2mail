@@ -32,6 +32,15 @@
     "typ" : "rss",
     "url" : "http://feed.dilbert.com/dilbert/daily_strip",
     "mailtosuf" : "comics"
+    },
+    {
+    "typ" : "urlgroup",
+    "url" : "https://www.maharashtratimes.com",
+    "subpref" : "MT",
+    "subfeeds" : [
+        { "url" : "https://maharashtratimes.com/maharashtra/pune-news/articlelist/2429654.cms", "urlregex" : "/maharashtra/pune-news/.", "mailtosuf" : "pune" },
+        { "url" : "https://maharashtratimes.com/maharashtra/mumbai-news/articlelist/2429656.cms", "urlregex" : "/maharashtra/mumbai-news/.", "mailtosuf" : "mumbai" }
+        ]
     }
     ]
 }
