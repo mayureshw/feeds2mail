@@ -5,14 +5,16 @@
 # Each field can be a scalar or a list
 
 from email.message import EmailMessage
+from email.policy import EmailPolicy
 import smtplib
 import magic
 
+policy = EmailPolicy(max_line_length = 990)
 emaildatefmt = '%a, %d %b %Y %H:%M:%S %z'
 def uemail(msgs):
     for (sendas,sendat,to,cc,bcc,subject,msgtext,attachments) in msgs:
 
-        msg = EmailMessage()
+        msg = EmailMessage(policy=policy)
         msg['From'] = sendas
         if sendat: msg['Date'] = sendat if isinstance(sendat,str) else sendat.strftime(emaildatefmt)
         if to: msg['To'] = to
