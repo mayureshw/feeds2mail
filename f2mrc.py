@@ -111,7 +111,7 @@ class metarss(Feed):
         feedre = re.compile(self.feedregex)
         dom = bs(urlopen(Request(self.url,headers=self.headers)).read(),features='lxml')
         links = dom.findAll('a',href=feedre)
-        sfs = [ { **sf, **{'txtre' : re.compile(sf['txtregex'])} } for sf in self.subfeeds ]
+        sfs = [ { **sf, **{'txtre' : re.compile(sf['txtregex'])} } for sf in self.subfeeds if sf.get('active',True) ]
         self.feeds = [ f for f in [
             next(iter([
             rss(self.rc,{**sf,**{'subpref':self.subpref,'url':self.qualifyurl(l['href'])}})
@@ -145,7 +145,7 @@ class url(Feed):
         return [ urlitem(l,self) for l in links if l.get('href',None) ]
 
 class urlgroup(metarss):
-    def setfeeds(self): self.feeds = [ url(self.rc,{**f,**{'subpref':self.subpref}}) for f in self.subfeeds ]
+    def setfeeds(self): self.feeds = [ url(self.rc,{**f,**{'subpref':self.subpref}}) for f in self.subfeeds if f.get('active',True) ]
 
 class FeedRC:
     def __init__(self):
