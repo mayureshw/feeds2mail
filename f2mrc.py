@@ -9,10 +9,12 @@ from emailutils import uemail
 from feedparser import parse as rssparse
 from functools import reduce
 from yt_dlp import YoutubeDL
+from os import environ
 import re
 
 def vidur(url):
-    with YoutubeDL({'quiet':True}) as ydl:
+    proxy = environ.get('HTTPSPROXY',None)
+    with YoutubeDL({'quiet':True,'proxy':proxy}) as ydl:
         try:
             return ydl.extract_info(url, download=False)['duration_string']
         except Exception:
