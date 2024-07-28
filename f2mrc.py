@@ -13,12 +13,12 @@ from os import environ
 import re
 
 def vidur(url):
-    proxy = environ.get('HTTPSPROXY',None)
-    with YoutubeDL({'quiet':True,'proxy':proxy}) as ydl:
+    with YoutubeDL({'quiet':True,'cookiesfrombrowser':('firefox',)}) as ydl:
         try:
-            return ydl.extract_info(url, download=False)['duration_string']
+            info = ydl.extract_info(url, download=False)
+            return info.get('duration_string','XX:XX')
         except Exception:
-            return ''
+            return 'XX:XX'
 
 def subclassest(cls): return [ st for s in cls.__subclasses__() for st in [s]+subclassest(s) ]
 

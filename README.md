@@ -65,8 +65,9 @@ The youtube feed items carry the video duration in the subject line (using
 yt-dlp package) of the email. This may help in deciding whether to view the
 item now or at leisure later.
 
-If use of yt-dlp requires a proxy, set the environment variable HTTPSPROXY. The
-proxy is used to extract only the video duration using yt-dlp.
+Since youtube access mandated a login, for the duration functionality to work
+you must have logged in your default profile. We use 'cookiesfrombrowser'
+option to extract the duration information.
 
 ## url
 
