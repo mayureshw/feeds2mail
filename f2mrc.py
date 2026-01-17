@@ -13,7 +13,14 @@ from os import environ
 import re
 
 def vidur(url):
-    with YoutubeDL({'ignore_no_formats_error':1,'quiet':True,'cookiesfrombrowser':('firefox',)}) as ydl:
+    ytdlopts = {
+        'ignore_no_formats_error':1,
+        'quiet':True,
+        'cookiesfrombrowser':('firefox',),
+        'js_runtimes': {'node' : {}},
+        'remote_components': { 'ejs:github' },
+        }
+    with YoutubeDL(ytdlopts) as ydl:
         try:
             info = ydl.extract_info(url, download=False)
             return info.get('duration_string','XX:XX')
