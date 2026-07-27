@@ -175,7 +175,15 @@ class url(Feed):
         return [ urlitem(l,self) for l in links if l.get('href',None) ]
 
 class urlgroup(metarss):
-    def setfeeds(self): self.feeds = [ url(self.rc,{**f,**{'subpref':self.subpref}}) for f in self.subfeeds if f.get('active',True) ]
+    def setfeeds(self):
+        self.feeds = [
+            url(self.rc,{**f,**{
+                # subfeeds inherit these props:
+                'subpref':self.subpref,
+                'alt_fetch_cmd':self.alt_fetch_cmd
+                }})
+            for f in self.subfeeds if f.get('active',True)
+            ]
 
 class FeedRC:
     def __init__(self):

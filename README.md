@@ -124,7 +124,7 @@ Most typically you might want to specify the following:
 
     alt_fetch_cmd : In case the Python's default fetch command fails to bring
     a page, an external command that accepts URL as the last argument and puts
-    the page on stdout will be tried (e.g. ssh me@somehost curl -sL). This is
+    the page on stdout will be tried (e.g. ssh me@somehost curl -fsL). This is
     useful in dealing with sites that are sensitive to your geolocation.
 
 
