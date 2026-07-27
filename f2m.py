@@ -23,6 +23,6 @@ else:
 
 for feed in frc.feeds:
     try: feed.run()
-    except Exception as e: print('','There was an error running this feed:',e)
+    except Exception as e: print('','There was an error running this feed:',feed.url,e)
     if frc.dryrun: break
 if not frc.dryrun: fs.savestat()

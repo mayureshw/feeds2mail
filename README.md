@@ -122,6 +122,12 @@ Most typically you might want to specify the following:
 
     mailto : default email id to which generated emails should be sent
 
+    alt_fetch_cmd : In case the Python's default fetch command fails to bring
+    a page, an external command that accepts URL as the last argument and puts
+    the page on stdout will be tried (e.g. ssh me@somehost curl -sL). This is
+    useful in dealing with sites that are sensitive to your geolocation.
+
+
 feeds is a list of dictionaries where each dictionary specifies properties of 1
 feed. Following properties can be specified:
 

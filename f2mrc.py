@@ -2,6 +2,7 @@ from conf import *
 from feedstat import fs
 import json
 from urllib.request import urlopen, Request
+from urllib.error import HTTPError
 from urllib.parse import urlparse, urljoin, quote, urlencode
 from bs4 import BeautifulSoup as bs
 from datetime import datetime, timedelta
@@ -11,6 +12,8 @@ from functools import reduce
 from yt_dlp import YoutubeDL
 from os import environ
 import re
+import subprocess
+import shlex
 
 def vidur(url):
     ytdlopts = {
@@ -30,12 +33,30 @@ def vidur(url):
 def subclassest(cls): return [ st for s in cls.__subclasses__() for st in [s]+subclassest(s) ]
 
 class Feed:
-    headers = {'User-agent':'ELinks/0.9.3 (textmode; Linux 2.6.9-kanotix-8 i686; 127x41)'}
+    headers = {
+        'User-agent':'ELinks/0.9.3 (textmode; Linux 2.6.9-kanotix-8 i686; 127x41)'
+        }
     _defaults = {
-        'mailtosuf':'', 'sendas':'nobody@localhost', 'subpref':'', 'remarks':'', 'txtregex':'.',
-        'urlregex':'.', 'active':True,
+        'mailtosuf'     : '',
+        'sendas'        : 'nobody@localhost',
+        'subpref'       : '',
+        'remarks'       : '',
+        'txtregex'      : '.',
+        'urlregex'      : '.',
+        'active'        : True,
+        'alt_fetch_cmd' : None,
         }
     toolddt = datetime.today() - timedelta(days=365)
+    def fetch(self):
+        try:
+            return urlopen(Request(self.url,headers=self.headers)).read()
+        except HTTPError as e:
+            if self.alt_fetch_cmd:
+                print('Trying alt_fetch_cmd for',self.url)
+                cmd = shlex.split(self.alt_fetch_cmd) + [ self.url ]
+                page = subprocess.check_output(cmd)
+                return page
+            else: raise
     def subpref2(self,item): return ''
     def qualifyurl(self,url):
         sch,base,_ = urlparse(url)[:3]
@@ -107,7 +128,7 @@ class rss(Feed):
         if self.feedtoold: print('','feed too old',self.url)
         if self.feedblank: print('','feed blank',self.url)
     def items(self):
-        items = [ rssitem(i,self) for i in rssparse(self.url)['entries'] ]
+        items = [ rssitem(i,self) for i in rssparse(self.fetch())['entries'] ]
         self.feedblank = len(items) == 0
         self.feedtoold = not self.feedblank and max(items,key=lambda i:i.date).date < self.toolddt
         return items
@@ -118,7 +139,7 @@ class metarss(Feed):
         for f in self.feeds: f.report()
     def setfeeds(self):
         feedre = re.compile(self.feedregex)
-        dom = bs(urlopen(Request(self.url,headers=self.headers)).read(),features='lxml')
+        dom = bs(self.fetch(),features='lxml')
         links = dom.findAll('a',href=feedre)
         sfs = [ { **sf, **{'txtre' : re.compile(sf['txtregex'])} } for sf in self.subfeeds if sf.get('active',True) ]
         self.feeds = [ f for f in [
@@ -147,7 +168,7 @@ class url(Feed):
     def items(self):
         txtre = re.compile(self.txtregex)
         urlre = re.compile(self.urlregex)
-        dom = bs(urlopen(Request(self.url,headers=self.headers)).read(),features='html.parser')
+        dom = bs(self.fetch(),features='html.parser')
         # Strangely text=txtre is not filtering some feeds properly, so filtering explicitly
         #links = dom.findAll('a',text=txtre,href=urlre)
         links = [ l for l in dom.findAll('a',href=urlre) if re.search(txtre,l.text.strip()) ]
