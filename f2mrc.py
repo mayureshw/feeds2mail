@@ -5,7 +5,7 @@ from urllib.request import urlopen, Request
 from urllib.error import HTTPError
 from urllib.parse import urlparse, urljoin, quote, urlencode
 from bs4 import BeautifulSoup as bs
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from emailutils import uemail
 from feedparser import parse as rssparse
 from functools import reduce
@@ -14,21 +14,6 @@ from os import environ
 import re
 import subprocess
 import shlex
-
-def vidur(url):
-    ytdlopts = {
-        'ignore_no_formats_error':1,
-        'quiet':True,
-        'cookiesfrombrowser':('firefox',),
-        'js_runtimes': {'node' : {}},
-        'remote_components': { 'ejs:github' },
-        }
-    with YoutubeDL(ytdlopts) as ydl:
-        try:
-            info = ydl.extract_info(url, download=False)
-            return info.get('duration_string','XX:XX')
-        except Exception:
-            return 'XX:XX'
 
 def subclassest(cls): return [ st for s in cls.__subclasses__() for st in [s]+subclassest(s) ]
 
@@ -45,6 +30,8 @@ class Feed:
         'urlregex'      : '.',
         'active'        : True,
         'alt_fetch_cmd' : None,
+        'channelid'     : None,
+        'playlistid'    : None,
         }
     toolddt = datetime.today() - timedelta(days=365)
     def fetch(self):
@@ -52,15 +39,13 @@ class Feed:
             return urlopen(Request(self.url,headers=self.headers)).read()
         except HTTPError as e:
             if self.alt_fetch_cmd:
-                print('Trying alt_fetch_cmd for',self.url)
+                print('','There was an error running feed:',self.url,e)
+                print('','Trying alt_fetch_cmd for',self.url)
                 cmd = shlex.split(self.alt_fetch_cmd) + [ self.url ]
                 page = subprocess.check_output(cmd)
                 return page
             else: raise
     def subpref2(self,item): return ''
-    def qualifyurl(self,url):
-        sch,base,_ = urlparse(url)[:3]
-        return url if base and sch else urljoin(self.baseurl,quote(url,safe='=?&/'))
     def send(self,items):
         if self.rc.dryrun: return
         # (sendas,sendat,to,cc,bcc,subject,text,attachments)
@@ -85,7 +70,6 @@ class Feed:
         if self.mailtosuf:
             basemail,domain = self.mailto.split('@')
             self.mailto = basemail + '+' + self.mailtosuf + '@' + domain
-        self.baseurl = '://'.join(urlparse(self.url)[:2])
 class item:
     def morelinks(self): return []
     def descr(self) : return ''
@@ -134,6 +118,10 @@ class rss(Feed):
         return items
 
 class metarss(Feed):
+    def qualifyurl(self,url):
+        baseurl = '://'.join(urlparse(self.url)[:2])
+        sch,base,_ = urlparse(url)[:3]
+        return url if base and sch else urljoin(baseurl,quote(url,safe='=?&/'))
     def report(self):
         if self.duplcnt: print('','duplicates:',self.duplcnt)
         for f in self.feeds: f.report()
@@ -155,14 +143,53 @@ class metarss(Feed):
         self.duplcnt = len(items) - len(reditems)
         return reditems
 
-class youtube(rss):
-    ytrsspref = 'https://www.youtube.com/feeds/videos.xml?'
-    def subpref2(self,item): return vidur(item.url)
+class ytitem(item):
+    def __init__(self,entry,f):
+        self.f = f
+        self.url = entry['url']
+
+        timestamp = entry['timestamp']
+        self.date = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+
+        duration = entry['duration']
+        h, rem = divmod(duration, 3600)
+        m, s = divmod(rem, 60)
+        self.subpref2 = f"{h}:{m}:{s:02d}" if h else f"{m}:{s:02d}"
+
+        self.title = entry['title']
+
+class youtube(Feed):
+    ytdl_opts = {
+        'extract_flat': True,
+        'quiet': True,
+        'skip_download': True,
+        'playlistend': 15,
+        'extractor_args': {
+            'youtubetab': {
+                'approximate_date': ['true'],
+            },
+        }
+    }
+    ytbase = 'https://www.youtube.com/'
+    def subpref2(self,item): return item.subpref2
+    def report(self): pass
+    def items(self):
+        ydl = YoutubeDL(self.ytdl_opts)
+        info = ydl.extract_info(self.url, download=False)
+        entries_with_id = [ e for e in info.get('entries',[]) if e.get('id') ]
+        # implement sorting and trimming only if required
+        #entries_latest = sorted( entries_with_id,
+        #    key=lambda entry: entry.get('timestamp') or 0,
+        #    reverse=True
+        #    )
+        #entries_trimmed = entries_latest[:15]
+        entries_trimmed = entries_with_id
+        return [ ytitem(e,self) for e in entries_trimmed ]
     def __init__(self,rc,fspec):
-        urlargs = { 'channel_id' : fspec['channelid'] } if 'channelid' in fspec else {
-            'playlist_id' : fspec['playlistid'] }
-        url = self.ytrsspref + urlencode(urlargs)
-        super().__init__(rc,{**fspec,**{'url':url}})
+        super().__init__(rc,fspec)
+        self.url = ( self.ytbase + 'channel/' + self.channelid + '/videos' ) \
+            if self.channelid else \
+            ( self.ytbase + 'playlist?list=' + self.playlistid )
 
 class url(Feed):
     def items(self):
