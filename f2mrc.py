@@ -186,9 +186,16 @@ class youtube(Feed):
         return [ ytitem(e,self) for e in entries_trimmed ]
     def __init__(self,rc,fspec):
         super().__init__(rc,fspec)
-        self.url = ( self.ytbase + 'channel/' + self.channelid + '/videos' ) \
-            if self.channelid else \
-            ( self.ytbase + 'playlist?list=' + self.playlistid )
+        if self.channelid:
+            if self.channelid.startswith('UC'):
+                # UU means upload list, some channels don't place videos
+                # under /videos tab, but under /live. some don't have /live
+                # so check all uploads by changing the name to UU
+                self.url = self.ytbase + 'playlist?list=UU' + self.channelid[2:]
+            else:
+                self.url = self.ytbase + 'channel/' + self.channelid + '/videos'
+        else:
+            self.url = self.ytbase + 'playlist?list=' + self.playlistid
 
 class url(Feed):
     def items(self):
