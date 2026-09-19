@@ -172,7 +172,6 @@ class youtube(Feed):
     }
     ytbase = 'https://www.youtube.com/'
     def subpref2(self,item): return item.subpref2
-    def report(self): pass
     def items(self):
         ydl = YoutubeDL(self.ytdl_opts)
         info = ydl.extract_info(self.url, download=False)
