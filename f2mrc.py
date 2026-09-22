@@ -151,10 +151,12 @@ class ytitem(item):
         timestamp = entry['timestamp']
         self.date = datetime.fromtimestamp(timestamp, tz=timezone.utc)
 
-        duration = entry['duration']
-        h, rem = divmod(duration, 3600)
-        m, s = divmod(rem, 60)
-        self.subpref2 = f"{h}:{m}:{s:02d}" if h else f"{m}:{s:02d}"
+        duration = entry.get('duration')
+        if duration:
+            h, rem = divmod(duration, 3600)
+            m, s = divmod(rem, 60)
+            self.subpref2 = f"{h}:{m:02d}:{s:02d}" if h else f"{m}:{s:02d}"
+        else: self.subpref2 = 'XX:XX'
 
         self.title = entry['title']
 
